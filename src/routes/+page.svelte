@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import logo from '$lib/assets/favicon.svg';
 	import { navigating, page } from '$app/state';
 	import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
 	import LanguagesIcon from '@lucide/svelte/icons/languages';
@@ -95,9 +96,12 @@
 <Tooltip.Provider delayDuration={150}>
 	<div class="mx-auto max-w-5xl px-4">
 		<header class="flex flex-wrap items-end justify-between gap-4 border-b border-border pt-10 pb-6">
-			<div>
-				<p class="font-heading text-[11px] font-semibold tracking-[0.3em] text-primary uppercase">◆ builders.gg × Bungie</p>
-				<h1 class="mt-1 font-heading text-3xl font-bold tracking-wider uppercase md:text-4xl">D2 Build Lookup</h1>
+			<div class="flex items-center gap-4">
+				<img src={logo} alt="" class="size-12 md:size-14" />
+				<div>
+					<p class="font-heading text-[11px] font-semibold tracking-[0.3em] text-primary uppercase">◆ builders.gg × Bungie</p>
+					<h1 class="mt-1 font-heading text-3xl font-bold tracking-wider uppercase md:text-4xl">D2 Build Lookup</h1>
+				</div>
 			</div>
 			<div class="flex items-center gap-3">
 				<Select.Root type="single" value={data.langSetting} onValueChange={setLang}>
