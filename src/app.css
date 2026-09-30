@@ -133,3 +133,8 @@
 @utility chamfer {
 	clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
 }
+
+/* Oxanium caps sit above the line box center; trim to cap height so flex centering centers the letters. */
+@utility cap-trim {
+	text-box: trim-both cap alphabetic;
+}

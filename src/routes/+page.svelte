@@ -101,9 +101,9 @@
 			</div>
 			<div class="flex items-center gap-3">
 				<Select.Root type="single" value={data.langSetting} onValueChange={setLang}>
-					<Select.Trigger size="sm" aria-label="Sprache der Item-Namen">
+					<Select.Trigger aria-label="Sprache der Item-Namen" class="font-heading tracking-widest uppercase">
 						<LanguagesIcon />
-						{LANG_OPTIONS.find(([v]) => v === data.langSetting)?.[1]}
+						<span class="cap-trim">{LANG_OPTIONS.find(([v]) => v === data.langSetting)?.[1]}</span>
 					</Select.Trigger>
 					<Select.Content>
 						{#each LANG_OPTIONS as [value, label] (value)}
@@ -112,9 +112,22 @@
 					</Select.Content>
 				</Select.Root>
 				{#if data.user}
-					<form method="POST" action="/auth/logout" class="flex items-center gap-3">
-						<span class="font-heading text-xs tracking-widest text-muted-foreground uppercase">{data.user}</span>
-						<Button type="submit" variant="ghost" size="sm"><LogOutIcon />Logout</Button>
+					{@const [name, code] = data.user.split('#')}
+					<form method="POST" action="/auth/logout" class="flex h-8 items-stretch border border-input bg-input/30">
+						<span class="flex items-center gap-2 px-3 font-heading text-xs tracking-widest uppercase">
+							<span class="size-1.5 rotate-45 bg-owned shadow-[0_0_6px_var(--owned)]"></span>
+							<span class="cap-trim">{name}{#if code}<span class="text-muted-foreground">#{code}</span>{/if}</span>
+						</span>
+						<Button
+							type="submit"
+							variant="ghost"
+							size="icon"
+							title="Logout"
+							aria-label="Logout"
+							class="size-auto w-8 border-0 border-l border-input hover:text-missing"
+						>
+							<LogOutIcon />
+						</Button>
 					</form>
 				{:else}
 					<Button href="/auth/login" data-sveltekit-reload size="lg" class="chamfer px-5 font-heading tracking-widest uppercase">
