@@ -14,6 +14,6 @@ Compares popular DIM builds from [builders.gg](https://builders.gg/destiny/dim-b
 
 ## Deploy (Coolify)
 
-Nixpacks/Node: build `npm run build`, start `npm start`, port 3000.
+Build pack **Dockerfile**, port 3000.
 Env: `BUNGIE_API_KEY`, `BUNGIE_CLIENT_ID`, `BUNGIE_CLIENT_SECRET`, `ORIGIN=https://<domain>`.
 The item manifest (~60 MB JSON) is loaded into memory on first request; plan for ~512 MB RAM.
