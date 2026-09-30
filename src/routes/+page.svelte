@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { navigating, page } from '$app/state';
 	import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
+	import LanguagesIcon from '@lucide/svelte/icons/languages';
 	import LogOutIcon from '@lucide/svelte/icons/log-out';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -60,6 +61,19 @@
 		}
 	]);
 
+	const LANG_OPTIONS = [
+		['auto', 'Browser'],
+		['de', 'Deutsch'],
+		['en', 'English'],
+		['fr', 'Français']
+	];
+
+	function setLang(value: string) {
+		document.cookie =
+			value === 'auto' ? 'lang=; path=/; max-age=0' : `lang=${value}; path=/; max-age=31536000; samesite=lax`;
+		goto(page.url, { invalidateAll: true, keepFocus: true, noScroll: true });
+	}
+
 	function setParam(key: string, value: string) {
 		const url = new URL(page.url);
 		if (value === 'all') url.searchParams.delete(key);
@@ -85,16 +99,29 @@
 				<p class="font-heading text-[11px] font-semibold tracking-[0.3em] text-primary uppercase">◆ builders.gg × Bungie</p>
 				<h1 class="mt-1 font-heading text-3xl font-bold tracking-wider uppercase md:text-4xl">D2 Build Lookup</h1>
 			</div>
-			{#if data.user}
-				<form method="POST" action="/auth/logout" class="flex items-center gap-3">
-					<span class="font-heading text-xs tracking-widest text-muted-foreground uppercase">{data.user}</span>
-					<Button type="submit" variant="ghost" size="sm"><LogOutIcon />Logout</Button>
-				</form>
-			{:else}
-				<Button href="/auth/login" data-sveltekit-reload size="lg" class="chamfer px-5 font-heading tracking-widest uppercase">
-					Mit Bungie einloggen
-				</Button>
-			{/if}
+			<div class="flex items-center gap-3">
+				<Select.Root type="single" value={data.langSetting} onValueChange={setLang}>
+					<Select.Trigger size="sm" aria-label="Sprache der Item-Namen">
+						<LanguagesIcon />
+						{LANG_OPTIONS.find(([v]) => v === data.langSetting)?.[1]}
+					</Select.Trigger>
+					<Select.Content>
+						{#each LANG_OPTIONS as [value, label] (value)}
+							<Select.Item {value} {label} />
+						{/each}
+					</Select.Content>
+				</Select.Root>
+				{#if data.user}
+					<form method="POST" action="/auth/logout" class="flex items-center gap-3">
+						<span class="font-heading text-xs tracking-widest text-muted-foreground uppercase">{data.user}</span>
+						<Button type="submit" variant="ghost" size="sm"><LogOutIcon />Logout</Button>
+					</form>
+				{:else}
+					<Button href="/auth/login" data-sveltekit-reload size="lg" class="chamfer px-5 font-heading tracking-widest uppercase">
+						Mit Bungie einloggen
+					</Button>
+				{/if}
+			</div>
 		</header>
 
 		<div class="flex flex-wrap items-center gap-2 py-5">
