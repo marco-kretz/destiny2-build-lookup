@@ -12,7 +12,20 @@ export default defineConfig({
 				// Force runes mode for the project, except for libraries. Can be removed in svelte 6.
 				runes: ({ filename }) => filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
-			adapter: adapter()
+			adapter: adapter(),
+			csp: {
+				mode: 'auto',
+				directives: {
+					'default-src': ['self'],
+					'img-src': ['self', 'data:', 'https://www.bungie.net'],
+					// Svelte transitions and bits-ui positioning use inline styles
+					'style-src': ['self', 'unsafe-inline'],
+					'object-src': ['none'],
+					'base-uri': ['self'],
+					'form-action': ['self'],
+					'frame-ancestors': ['none']
+				}
+			}
 		}),
 		// Bungie OAuth only redirects to https, also in dev
 		basicSsl()
