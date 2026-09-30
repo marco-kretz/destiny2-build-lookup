@@ -17,6 +17,13 @@
 
 	let playableOnly = $state(false);
 
+	// Hysteresis: the header shrinks by ~90px, so a single threshold would flip back and forth.
+	let compact = $state(false);
+	function onScroll() {
+		if (scrollY > 120) compact = true;
+		else if (scrollY < 8) compact = false;
+	}
+
 	const STATUS = {
 		owned: { label: 'Spielbar', badge: 'border-owned/40 bg-owned/10 text-owned', bar: 'bg-owned', frame: 'ring-owned/70' },
 		collection: {
@@ -93,78 +100,112 @@
 	</div>
 {/if}
 
+<svelte:window onscroll={onScroll} />
+
 <Tooltip.Provider delayDuration={150}>
-	<div class="mx-auto max-w-5xl px-4">
-		<header class="flex flex-wrap items-end justify-between gap-4 border-b border-border pt-10 pb-6">
-			<div class="flex items-center gap-4">
-				<img src={logo} alt="" class="size-12 md:size-14" />
-				<div>
-					<p class="font-heading text-[11px] font-semibold tracking-[0.3em] text-primary uppercase">◆ builders.gg × Bungie</p>
-					<h1 class="mt-1 font-heading text-3xl font-bold tracking-wider uppercase md:text-4xl">D2 Build Lookup</h1>
-				</div>
-			</div>
-			<div class="flex items-center gap-3">
-				<Select.Root type="single" value={data.langSetting} onValueChange={setLang}>
-					<Select.Trigger aria-label="Sprache der Item-Namen" class="font-heading tracking-widest uppercase">
-						<LanguagesIcon />
-						<span class="cap-trim">{LANG_OPTIONS.find(([v]) => v === data.langSetting)?.[1]}</span>
-					</Select.Trigger>
-					<Select.Content>
-						{#each LANG_OPTIONS as [value, label] (value)}
-							<Select.Item {value} {label} />
-						{/each}
-					</Select.Content>
-				</Select.Root>
-				{#if data.user}
-					{@const [name, code] = data.user.split('#')}
-					<form method="POST" action="/auth/logout" class="flex h-8 items-stretch border border-input bg-input/30">
-						<span class="flex items-center gap-2 px-3 font-heading text-xs tracking-widest uppercase">
-							<span class="size-1.5 rotate-45 bg-owned shadow-[0_0_6px_var(--owned)]"></span>
-							<span class="cap-trim">{name}{#if code}<span class="text-muted-foreground">#{code}</span>{/if}</span>
-						</span>
-						<Button
-							type="submit"
-							variant="ghost"
-							size="icon"
-							title="Logout"
-							aria-label="Logout"
-							class="size-auto w-8 border-0 border-l border-input hover:text-missing"
-						>
-							<LogOutIcon />
-						</Button>
-					</form>
-				{:else}
-					<Button href="/auth/login" data-sveltekit-reload size="lg" class="chamfer px-5 font-heading tracking-widest uppercase">
-						Mit Bungie einloggen
-					</Button>
-				{/if}
-			</div>
-		</header>
+	<div class="sticky top-0 z-40">
+		<div class="relative z-10 border-b border-border bg-background">
+			<div class="relative mx-auto max-w-5xl px-4">
+				<header
+					class="flex flex-wrap justify-between gap-4 border-b border-border transition-all duration-300 {compact
+						? 'items-center pt-3 pb-3'
+						: 'items-end pt-10 pb-6'}"
+				>
+					<div class="flex items-center gap-4">
+						<img src={logo} alt="" class="transition-all duration-300 {compact ? 'size-8' : 'size-12 md:size-14'}" />
+						<div>
+							<div class="grid transition-all duration-300 {compact ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr]'}">
+								<p class="overflow-hidden font-heading text-[11px] font-semibold tracking-[0.3em] text-primary uppercase">
+									◆ builders.gg × Bungie
+								</p>
+							</div>
+							<h1
+								class="font-heading font-bold tracking-wider uppercase transition-all duration-300 {compact
+									? 'text-xl'
+									: 'mt-1 text-3xl md:text-4xl'}"
+							>
+								D2 Build Lookup
+							</h1>
+						</div>
+					</div>
+					<div class="flex items-center gap-3">
+						<Select.Root type="single" value={data.langSetting} onValueChange={setLang}>
+							<Select.Trigger aria-label="Sprache der Item-Namen" class="font-heading tracking-widest uppercase">
+								<LanguagesIcon />
+								<span class="cap-trim">{LANG_OPTIONS.find(([v]) => v === data.langSetting)?.[1]}</span>
+							</Select.Trigger>
+							<Select.Content>
+								{#each LANG_OPTIONS as [value, label] (value)}
+									<Select.Item {value} {label} />
+								{/each}
+							</Select.Content>
+						</Select.Root>
+						{#if data.user}
+							{@const [name, code] = data.user.split('#')}
+							<form method="POST" action="/auth/logout" class="flex h-8 items-stretch border border-input bg-input/30">
+								<span class="flex items-center gap-2 px-3 font-heading text-xs tracking-widest uppercase">
+									<span class="size-1.5 rotate-45 bg-owned shadow-[0_0_6px_var(--owned)]"></span>
+									<span class="cap-trim">{name}{#if code}<span class="text-muted-foreground">#{code}</span>{/if}</span>
+								</span>
+								<Button
+									type="submit"
+									variant="ghost"
+									size="icon"
+									title="Logout"
+									aria-label="Logout"
+									class="size-auto w-8 border-0 border-l border-input hover:text-missing"
+								>
+									<LogOutIcon />
+								</Button>
+							</form>
+						{:else}
+							<Button href="/auth/login" data-sveltekit-reload size="lg" class="chamfer px-5 font-heading tracking-widest uppercase">
+								Mit Bungie einloggen
+							</Button>
+						{/if}
+					</div>
+				</header>
 
-		<div class="flex flex-wrap items-center gap-2 py-5">
-			{#each filters as f (f.key)}
-				<Select.Root type="single" value={f.value} onValueChange={(v) => setParam(f.key, v)}>
-					<Select.Trigger aria-label={f.key}>
-						{f.options.find(([v]) => v === f.value)?.[1]}
-					</Select.Trigger>
-					<Select.Content>
-						{#each f.options as [value, label] (value)}
-							<Select.Item {value} {label} />
-						{/each}
-					</Select.Content>
-				</Select.Root>
-			{/each}
-			{#if data.user}
-				<div class="ml-2 flex items-center gap-2">
-					<Switch id="playable" bind:checked={playableOnly} />
-					<Label for="playable" class="text-xs">Nur machbare</Label>
+				<div class="flex flex-wrap items-center gap-2 transition-all duration-300 {compact ? 'py-3' : 'py-5'}">
+					{#each filters as f (f.key)}
+						<Select.Root type="single" value={f.value} onValueChange={(v) => setParam(f.key, v)}>
+							<Select.Trigger aria-label={f.key}>
+								{f.options.find(([v]) => v === f.value)?.[1]}
+							</Select.Trigger>
+							<Select.Content>
+								{#each f.options as [value, label] (value)}
+									<Select.Item {value} {label} />
+								{/each}
+							</Select.Content>
+						</Select.Root>
+					{/each}
+					{#if data.user}
+						<div class="ml-2 flex items-center gap-2">
+							<Switch id="playable" bind:checked={playableOnly} />
+							<Label for="playable" class="text-xs">Nur machbare</Label>
+						</div>
+					{/if}
+					<span class="ml-auto font-heading text-xs tracking-widest text-muted-foreground uppercase">
+						<span class="text-foreground">{visible.length}</span> Builds
+					</span>
 				</div>
-			{/if}
-			<span class="ml-auto font-heading text-xs tracking-widest text-muted-foreground uppercase">
-				<span class="text-foreground">{visible.length}</span> Builds
-			</span>
+				<!-- HUD accent on the bottom border: gold segment ending in a diamond, grows with scroll progress -->
+				<span class="absolute inset-x-4 -bottom-px h-0.5">
+					<span class="scroll-progress relative block h-full w-24 bg-primary">
+						<span class="absolute top-1/2 -right-[3px] size-1.5 -translate-y-1/2 rotate-45 bg-primary"></span>
+					</span>
+				</span>
+			</div>
 		</div>
+		<!-- Cards fade out as they scroll under the header; hidden at the top so the first card stays crisp -->
+		<div
+			class="pointer-events-none absolute inset-x-0 top-full h-10 bg-linear-to-b from-background to-transparent transition-opacity duration-300 {compact
+				? ''
+				: 'opacity-0'}"
+		></div>
+	</div>
 
+	<div class="mx-auto max-w-5xl px-4">
 		<ul class="grid gap-3 transition-opacity {navigating.to ? 'opacity-50' : ''}">
 			{#each visible as b (b.id)}
 				{@const status = b.status && STATUS[b.status]}

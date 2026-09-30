@@ -143,3 +143,15 @@
 @utility cap-trim {
 	text-box: trim-both cap alphabetic;
 }
+
+/* Width follows the page scroll position; browsers without scroll timelines keep the base width. */
+@utility scroll-progress {
+	animation: scroll-progress linear both;
+	animation-timeline: scroll(root);
+}
+
+@keyframes scroll-progress {
+	to {
+		width: 100%;
+	}
+}
